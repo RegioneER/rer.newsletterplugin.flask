@@ -17,7 +17,9 @@ Vedi: ``rer.newsletterdispatcher.flask``.
 Features
 --------
 
-- Can be bullet points
+- All'installazione registra un nuovo adapter (``flask_adapter``) che sovrascrive
+  quello base di ``rer.newsletter`` permettendoci di gestire l'invio della
+  newsletter esternamente.
 
 
 Translations
