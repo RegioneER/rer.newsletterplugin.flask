@@ -6,25 +6,20 @@
 rer.newsletterplugin.flask
 ==========================
 
-Tell me what your product does
+Questo prodotto serve per "spostare" l'invio delle newsletter del prodotto
+``rer.newsletter`` al di fuori di Plone. L'obiettivo è rendere il tutto più
+flessibile e fluido appoggiandosi ad un'app Flask che penserà a gestire
+l'intero job di invio e comunicare a Plone l'esito dell'operazione.
+
+Vedi: ``rer.newsletterdispatcher.flask``.
+
 
 Features
 --------
 
-- Can be bullet points
-
-
-Examples
---------
-
-This add-on can be seen in action at the following sites:
-- Is there a page on the internet where everybody can see the features?
-
-
-Documentation
--------------
-
-Full documentation for end users can be found in the "docs" folder, and is also available online at http://docs.plone.org/foo/bar
+- All'installazione registra un nuovo adapter (``flask_adapter``) che sovrascrive
+  quello base di ``rer.newsletter`` permettendoci di gestire l'invio della
+  newsletter esternamente.
 
 
 Translations
@@ -32,7 +27,7 @@ Translations
 
 This product has been translated into
 
-- Klingon (thanks, K'Plai)
+- Italiano
 
 
 Installation
@@ -54,16 +49,8 @@ and then running ``bin/buildout``
 Contribute
 ----------
 
-- Issue Tracker: https://github.com/collective/rer.newsletterplugin.flask/issues
-- Source Code: https://github.com/collective/rer.newsletterplugin.flask
-- Documentation: https://docs.plone.org/foo/bar
-
-
-Support
--------
-
-If you are having issues, please let us know.
-We have a mailing list located at: project@example.com
+- Issue Tracker: https://github.com/RegioneER/rer.newsletterdispatcher.flask/issues
+- Source Code: https://github.com/RegioneER/rer.newsletterdispatcher.flask
 
 
 License

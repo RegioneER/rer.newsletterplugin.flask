@@ -20,6 +20,7 @@ dist/*
 test.plone_addon/
 var/
 # files
+.Python
 .installed.cfg
 .mr.developer.cfg
 lib64
