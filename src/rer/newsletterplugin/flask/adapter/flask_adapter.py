@@ -1,18 +1,13 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime
-from datetime import timedelta
 from email.utils import formataddr
-from plone import api
-from rer.newsletter import _
+from plone.protect.authenticator import createToken
 from rer.newsletter import logger
 from rer.newsletter.adapter.base_adapter import BaseAdapter
 from rer.newsletter.adapter.base_adapter import IChannelSender
 from rer.newsletter.utility.channel import INVALID_CHANNEL
 from rer.newsletter.utility.channel import OK
 from rer.newsletter.utility.channel import UNHANDLED
-from smtplib import SMTPRecipientsRefused
 from zope.interface import implementer
-from plone.protect.authenticator import createToken
 
 import json
 import requests
