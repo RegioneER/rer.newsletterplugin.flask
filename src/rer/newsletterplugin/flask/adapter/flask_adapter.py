@@ -13,6 +13,8 @@ from rer.newsletter.utility.channel import UNHANDLED
 from smtplib import SMTPRecipientsRefused
 from zope.interface import implementer
 
+import json
+import requests
 
 KEY = 'rer.newsletter.subscribers'
 
@@ -27,7 +29,33 @@ class FlaskAdapter(BaseAdapter):
         self.request = request
 
     def sendMessage(self, channel, message, unsubscribe_footer=None):
-        logger.warning('adapter: sendMessage %s %s', channel, message.title)
+        logger.debug('adapter: sendMessage %s %s', channel, message.title)
+
+        flask_url = "http://127.0.0.1:5000/add-to-queue"
+
+        headers = {"Content-Type": "application/json"}
+        payload = {
+                'channel_url': 'http://foo.com',
+                'subscribers': ['foo', 'bar'],
+                'subject': 'subject',
+                'mfrom': 'foo@bar.com',
+                '_authenticator': 'asdfghjkl',
+                'text': '...',
+            }
+
+        response = requests.post(
+            flask_url,
+            data=json.dumps(payload),
+            headers=headers,
+        )
+
+        if response.status_code != 200:
+            logger.error(
+                "adapter: can't sendMessage %s %s",
+                channel,
+                message.title
+            )
+            return UNHANDLED
 
         # nl = self._api(channel)
         # annotations, channel_obj = self._storage(channel)
