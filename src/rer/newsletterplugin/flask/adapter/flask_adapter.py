@@ -12,6 +12,7 @@ from rer.newsletter.utility.channel import OK
 from rer.newsletter.utility.channel import UNHANDLED
 from smtplib import SMTPRecipientsRefused
 from zope.interface import implementer
+from plone.protect.authenticator import createToken
 
 import json
 import requests
@@ -31,16 +32,38 @@ class FlaskAdapter(BaseAdapter):
     def sendMessage(self, channel, message, unsubscribe_footer=None):
         logger.debug('adapter: sendMessage %s %s', channel, message.title)
 
+        nl = self._api(channel)
+        annotations, channel_obj = self._storage(channel)
+        if annotations is None:
+            return INVALID_CHANNEL
+
         flask_url = "http://127.0.0.1:5000/add-to-queue"
 
+        # Costruzione del messaggio: body, subject, destinatari, ...
+        body = self._getMessage(nl, message, unsubscribe_footer)
+
+        nl_subject = ' - ' + nl.subject_email if nl.subject_email else u''
+        subject = message.title + nl_subject
+
+        response_email = nl.sender_email or "noreply@rer.it"
+        sender = formataddr((nl.sender_name, response_email))
+        token = createToken()
+
+        # recipients = [annotations[user]['email'] for user in annotations.keys() if annotations[user]['is_active']]  # noqa
+        recipients = []
+        for user in annotations.keys():
+            if annotations[user]['is_active']:
+                recipients.append(annotations[user]['email'])
+
+        # Preparazione della request con il vero payload e l'header
         headers = {"Content-Type": "application/json"}
         payload = {
-                'channel_url': 'http://foo.com',
-                'subscribers': ['foo', 'bar'],
-                'subject': 'subject',
-                'mfrom': 'foo@bar.com',
-                '_authenticator': 'asdfghjkl',
-                'text': '...',
+                'channel_url': nl.absolute_url(),
+                'subscribers': recipients,
+                'subject': subject,
+                'mfrom': sender,
+                '_authenticator': token,
+                'text': body.getData(),
             }
 
         response = requests.post(
@@ -56,35 +79,5 @@ class FlaskAdapter(BaseAdapter):
                 message.title
             )
             return UNHANDLED
-
-        # nl = self._api(channel)
-        # annotations, channel_obj = self._storage(channel)
-        # if annotations is None:
-        #     return INVALID_CHANNEL
-        #
-        # # costruisco il messaggio
-        # body = self._getMessage(nl, message, unsubscribe_footer)
-        #
-        # nl_subject = ' - ' + nl.subject_email if nl.subject_email else u''
-        # subject = message.title + nl_subject
-        #
-        # # costruisco l'indirizzo del mittente
-        # sender = formataddr((nl.sender_name, nl.sender_name))
-        #
-        # # invio la mail ad ogni utente
-        # mail_host = api.portal.get_tool(name='MailHost')
-        # try:
-        #     for user in annotations.keys():
-        #         if annotations[user]['is_active']:
-        #             mail_host.send(
-        #                 body.getData(),
-        #                 mto=annotations[user]['email'],
-        #                 mfrom=sender,
-        #                 subject=subject,
-        #                 charset='utf-8',
-        #                 msg_type='text/html'
-        #             )
-        # except SMTPRecipientsRefused:
-        #     return UNHANDLED
 
         return OK
