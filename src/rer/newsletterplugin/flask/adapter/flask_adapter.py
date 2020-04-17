@@ -53,13 +53,13 @@ class FlaskAdapter(BaseAdapter):
         # Preparazione della request con il vero payload e l'header
         headers = {"Content-Type": "application/json"}
         payload = {
-                'channel_url': nl.absolute_url(),
-                'subscribers': recipients,
-                'subject': subject,
-                'mfrom': sender,
-                '_authenticator': token,
-                'text': body.getData(),
-            }
+            'channel_url': nl.absolute_url(),
+            'subscribers': recipients,
+            'subject': subject,
+            'mfrom': sender,
+            '_authenticator': token,
+            'text': body.getData(),
+        }
 
         response = requests.post(
             flask_url,
