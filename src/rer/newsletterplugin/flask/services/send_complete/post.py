@@ -41,10 +41,10 @@ class SendCompletePost(Service):
             )
         if res != OK:
             if res == SEND_UID_NOT_FOUND:
-                self.request.response.setStatus(404)
+                self.request.response.setStatus(500)
                 return dict(
                     error=dict(
-                        type="NotFound",
+                        type="InternalServerError",
                         message='Send history "{uid}" not found in channel "{title}".'.format(  # noqa
                             uid=send_uid, title=self.context.title
                         ),
