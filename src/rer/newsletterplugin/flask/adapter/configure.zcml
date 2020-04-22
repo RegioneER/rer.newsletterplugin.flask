@@ -10,4 +10,5 @@
     provides="rer.newsletter.adapter.sender.IChannelSender"
     factory=".flask_adapter.FlaskAdapter"
     />
+
 </configure>
