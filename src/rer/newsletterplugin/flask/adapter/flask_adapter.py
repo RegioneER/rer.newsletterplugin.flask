@@ -2,11 +2,11 @@
 from email.utils import formataddr
 from plone.protect.authenticator import createToken
 from rer.newsletter import logger
-from rer.newsletter.adapter.base_adapter import BaseAdapter
-from rer.newsletter.adapter.base_adapter import IChannelSender
-from rer.newsletter.utility.channel import INVALID_CHANNEL
-from rer.newsletter.utility.channel import OK
-from rer.newsletter.utility.channel import UNHANDLED
+from rer.newsletter.adapter.sender import BaseAdapter
+from rer.newsletter.adapter.sender import IChannelSender
+from rer.newsletter.utils import INVALID_CHANNEL
+from rer.newsletter.utils import OK
+from rer.newsletter.utils import UNHANDLED
 from zope.interface import implementer
 
 import json
@@ -62,16 +62,12 @@ class FlaskAdapter(BaseAdapter):
         }
 
         response = requests.post(
-            flask_url,
-            data=json.dumps(payload),
-            headers=headers,
+            flask_url, data=json.dumps(payload), headers=headers
         )
 
         if response.status_code != 200:
             logger.error(
-                "adapter: can't sendMessage %s %s",
-                channel,
-                message.title
+                "adapter: can't sendMessage %s %s", channel, message.title
             )
             return UNHANDLED
 

@@ -5,10 +5,9 @@
   i18n_domain="rer.newsletter">
 
   <adapter
-    for="rer.newsletter.behaviors.ships.IShippableMarker
+    for="rer.newsletter.interfaces.IChannel
          rer.newsletterplugin.flask.interfaces.IRerNewsletterpluginFlaskLayer"
-    provides="rer.newsletter.adapter.base_adapter.IChannelSender"
+    provides="rer.newsletter.adapter.sender.IChannelSender"
     factory=".flask_adapter.FlaskAdapter"
     />
-
 </configure>
