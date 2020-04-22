@@ -4,7 +4,6 @@ from plone.protect.authenticator import createToken
 from rer.newsletter import logger
 from rer.newsletter.adapter.sender import BaseAdapter
 from rer.newsletter.adapter.sender import IChannelSender
-from rer.newsletter.utils import INVALID_CHANNEL
 from rer.newsletter.utils import OK
 from rer.newsletter.utils import UNHANDLED
 from zope.interface import implementer
@@ -28,9 +27,7 @@ class FlaskAdapter(BaseAdapter):
 
     def sendMessage(self, message):
         logger.debug(
-            'adapter: sendMessage %s %s',
-            self.context.title,
-            message.title,
+            'adapter: sendMessage %s %s', self.context.title, message.title
         )
 
         # Costruzione del messaggio: body, subject, destinatari, ...
@@ -72,16 +69,14 @@ class FlaskAdapter(BaseAdapter):
         }
 
         response = requests.post(
-            FLASK_URL,
-            data=json.dumps(payload),
-            headers=headers,
+            FLASK_URL, data=json.dumps(payload), headers=headers
         )
 
         if response.status_code != 200:
             logger.error(
                 "adapter: can't sendMessage %s %s",
                 self.context.title,
-                message.title
+                message.title,
             )
             return UNHANDLED
 
