@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 from email.utils import formataddr
-from plone.protect.authenticator import createToken
 from rer.newsletter import logger
 from rer.newsletter.adapter.sender import BaseAdapter
 from rer.newsletter.adapter.sender import IChannelSender
+from rer.newsletter.utils import NOK
 from rer.newsletter.utils import OK
 from rer.newsletter.utils import UNHANDLED
 from zope.interface import implementer
+from requests.exceptions import ConnectionError
+from requests.exceptions import Timeout
 
 import json
 import requests
@@ -55,7 +57,6 @@ class FlaskAdapter(BaseAdapter):
         send_uid = self.set_start_send_infos(message=message)
 
         # Preparazione della request con il vero payload e l'header
-        token = createToken()
         body = self.prepare_body(message=message)
         headers = {"Content-Type": "application/json"}
         payload = {
@@ -63,15 +64,17 @@ class FlaskAdapter(BaseAdapter):
             'subscribers': recipients,
             'subject': subject,
             'mfrom': sender,
-            '_authenticator': token,
             'text': body.getData(),
             'send_uid': send_uid,
         }
-
-        response = requests.post(
-            FLASK_URL, data=json.dumps(payload), headers=headers
-        )
-
+        try:
+            response = requests.post(
+                FLASK_URL, data=json.dumps(payload), headers=headers
+            )
+        except (ConnectionError, Timeout) as e:
+            logger.exception(e)
+            self.set_end_send_infos(send_uid=send_uid, completed=False)
+            return NOK
         if response.status_code != 200:
             logger.error(
                 "adapter: can't sendMessage %s %s",

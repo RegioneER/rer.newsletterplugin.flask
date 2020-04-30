@@ -7,8 +7,8 @@ import subprocess
 
 domain = 'rer.newsletterplugin.flask'
 os.chdir(pkg_resources.resource_filename(domain, ''))
-os.chdir('../../../')
-target_path = 'src/rer/flask/'
+os.chdir('../../../../')
+target_path = 'src/rer/newsletterplugin/flask/'
 locale_path = target_path + 'locales/'
 i18ndude = './bin/i18ndude'
 
@@ -27,17 +27,11 @@ def locale_folder_setup():
             lc_messages_path = lang + '/LC_MESSAGES/'
             os.mkdir(lc_messages_path)
             cmd = 'msginit --locale={0} --input={1}.pot --output={2}/LC_MESSAGES/{3}.po'.format(  # NOQA: E501
-                lang,
-                domain,
-                lang,
-                domain,
+                lang, domain, lang, domain
             )
-            subprocess.call(
-                cmd,
-                shell=True,
-            )
+            subprocess.call(cmd, shell=True)
 
-    os.chdir('../../../../')
+    os.chdir('../../../../../')
 
 
 def _rebuild():
@@ -46,26 +40,16 @@ def _rebuild():
         locale_path=locale_path,
         domain=domain,
         target_path=target_path,
-        exclude=excludes
+        excludes=excludes,
     )
-    subprocess.call(
-        cmd,
-        shell=True,
-    )
+    subprocess.call(cmd, shell=True)
 
 
 def _sync():
     cmd = '{0} sync --pot {1}/{2}.pot {3}*/LC_MESSAGES/{4}.po'.format(
-        i18ndude,
-        locale_path,
-        domain,
-        locale_path,
-        domain,
+        i18ndude, locale_path, domain, locale_path, domain
     )
-    subprocess.call(
-        cmd,
-        shell=True,
-    )
+    subprocess.call(cmd, shell=True)
 
 
 def update_locale():

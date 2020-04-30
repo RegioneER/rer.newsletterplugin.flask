@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from persistent.dict import PersistentDict
 from plone import api
 from plone.app.testing import setRoles
 from plone.app.testing import SITE_OWNER_NAME
@@ -61,12 +62,30 @@ class SendCompleteServiceTest(unittest.TestCase):
     def test_update_end_date_if_is_right_uid(self):
         adapter = getMultiAdapter((self.channel, self.request), IChannelSender)
         history = adapter.get_annotations_for_channel(key=HISTORY_KEY)
-        history.append({'uid': 'foo'})
+        history.append(PersistentDict({'uid': 'foo'}))
         transaction.commit()
 
         payload = {'send_uid': 'foo'}
         response = self.api_session.post(
             '{}/@send-complete'.format(self.channel_url), json=payload
         )
+        transaction.commit()
 
         self.assertEqual(response.status_code, 204)
+        self.assertNotEqual(history[0]['send_date_end'], '---')
+        self.assertTrue(history[0]['completed'])
+
+    def test_mark_not_complete_if_pass_error_flag(self):
+        adapter = getMultiAdapter((self.channel, self.request), IChannelSender)
+        history = adapter.get_annotations_for_channel(key=HISTORY_KEY)
+        history.append(PersistentDict({'uid': 'foo'}))
+        transaction.commit()
+
+        payload = {'send_uid': 'foo', 'error': True}
+        response = self.api_session.post(
+            '{}/@send-complete'.format(self.channel_url), json=payload
+        )
+        transaction.commit()
+        self.assertEqual(response.status_code, 204)
+        self.assertNotEqual(history[0]['send_date_end'], '---')
+        self.assertFalse(history[0]['completed'])

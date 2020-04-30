@@ -9,12 +9,17 @@ from rer.newsletter.utils import SEND_UID_NOT_FOUND
 from zope.component import getMultiAdapter
 from zope.interface import alsoProvides
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class SendCompletePost(Service):
     def reply(self):
         data = json_body(self.request)
 
         send_uid = data.get("send_uid", None)
+        error = data.get("error", False)
 
         if not send_uid:
             self.request.response.setStatus(400)
@@ -23,13 +28,14 @@ class SendCompletePost(Service):
                     type="BadRequest", message='Missing "send_uid" parameter'
                 )
             )
-
         # Disable CSRF protection
         alsoProvides(self.request, IDisableCSRFProtection)
 
         adapter = getMultiAdapter((self.context, self.request), IChannelSender)
         try:
-            res = adapter.set_end_send_infos(send_uid=send_uid)
+            res = adapter.set_end_send_infos(
+                send_uid=send_uid, completed=not error
+            )
         except Exception:
             plone_utils = api.content.get_view(
                 name="plone_utils", context=self.context, request=self.request
