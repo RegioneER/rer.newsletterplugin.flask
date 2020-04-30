@@ -60,7 +60,7 @@ class SendToQueueTest(unittest.TestCase):
     def test_return_nok_if_queue_endpoint_not_set(self, m):
         m.post(QUEUE_URL, status_code=200)
         api.portal.set_registry_record(
-            'queue_endpoint', '', interface=INewsletterPluginFlaskSettings
+            'queue_endpoint', u'', interface=INewsletterPluginFlaskSettings
         )
 
         res = self.adapter.sendMessage(self.message)
