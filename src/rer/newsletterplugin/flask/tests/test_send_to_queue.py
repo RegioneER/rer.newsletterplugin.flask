@@ -18,7 +18,7 @@ from zope.component import getMultiAdapter
 import requests_mock
 import unittest
 
-QUEUE_URL = 'http://foo.bar'
+QUEUE_URL = u'http://foo.bar'
 
 
 class SendToQueueTest(unittest.TestCase):
@@ -34,15 +34,15 @@ class SendToQueueTest(unittest.TestCase):
         self.channel = api.content.create(
             container=self.portal,
             type='Channel',
-            title='Example channel',
+            title=u'Example channel',
             is_subscribable=True,
         )
 
         self.message = api.content.create(
             container=self.channel,
             type='Message',
-            title='Newsletter Foo vol. 1',
-            text=RichTextValue('This is the first message'),
+            title=u'Newsletter Foo vol. 1',
+            text=RichTextValue(u'This is the first message'),
         )
         api.content.transition(obj=self.message, transition='publish')
 
