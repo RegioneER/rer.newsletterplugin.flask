@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
 from email.utils import formataddr
+from plone import api
 from rer.newsletter import logger
 from rer.newsletter.adapter.sender import BaseAdapter
 from rer.newsletter.adapter.sender import IChannelSender
 from rer.newsletter.utils import NOK
 from rer.newsletter.utils import OK
 from rer.newsletter.utils import UNHANDLED
+from rer.newsletterplugin.flask import _
+from rer.newsletterplugin.flask.interfaces import (
+    INewsletterPluginFlaskSettings,
+)
 from zope.interface import implementer
 from requests.exceptions import ConnectionError
 from requests.exceptions import Timeout
@@ -15,7 +20,6 @@ import requests
 
 SUBSCRIBERS_KEY = 'rer.newsletter.subscribers'
 HISTORY_KEY = 'rer.newsletter.channel.history'
-FLASK_URL = "http://127.0.0.1:5000/add-to-queue"
 
 
 @implementer(IChannelSender)
@@ -31,7 +35,21 @@ class FlaskAdapter(BaseAdapter):
         logger.debug(
             'adapter: sendMessage %s %s', self.context.title, message.title
         )
-
+        queue_endpoint = api.portal.get_registry_record(
+            'queue_endpoint',
+            interface=INewsletterPluginFlaskSettings,
+            default=u'',
+        )
+        if not queue_endpoint:
+            api.portal.show_message(
+                message=_(
+                    u'endpoint_not_set',
+                    default=u'Queue endpoint not set. Please set it in site controlpanel.',  # noqa
+                ),
+                request=self.context.REQUEST,
+                type='error',
+            )
+            return NOK
         # Costruzione del messaggio: body, subject, destinatari, ...
         subscribers = self.get_annotations_for_channel(key=SUBSCRIBERS_KEY)
         recipients = []
@@ -69,7 +87,7 @@ class FlaskAdapter(BaseAdapter):
         }
         try:
             response = requests.post(
-                FLASK_URL, data=json.dumps(payload), headers=headers
+                queue_endpoint, data=json.dumps(payload), headers=headers
             )
         except (ConnectionError, Timeout) as e:
             logger.exception(e)

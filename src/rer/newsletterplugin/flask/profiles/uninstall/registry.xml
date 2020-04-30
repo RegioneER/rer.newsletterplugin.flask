@@ -3,6 +3,6 @@
     xmlns:i18n="http://xml.zope.org/namespaces/i18n"
     i18n:domain="rer.newsletterplugin.flask">
 
-    <records interface="rer.newsletterplugin.flask.interfaces.INewsletterPluginFlaskSettings" />
+    <records interface="rer.newsletterplugin.flask.interfaces.INewsletterPluginFlaskSettings" remove="True"/>
 
 </registry>

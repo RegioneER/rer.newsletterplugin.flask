@@ -68,6 +68,7 @@ setup(
             'plone.app.contenttypes',
             'plone.app.robotframework[debug]',
             'collective.MockMailHost',
+            'requests-mock',
         ]
     },
     entry_points="""
