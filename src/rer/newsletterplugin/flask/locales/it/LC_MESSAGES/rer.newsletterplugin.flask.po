@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2020-04-30 13:20+0000\n"
+"POT-Creation-Date: 2020-05-06 14:04+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI +ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,10 +22,25 @@ msgstr ""
 msgid "Uninstalls the rer.newsletterplugin.flask add-on."
 msgstr ""
 
+#. Default: "Queue endpoint not set. Please set it in site controlpanel."
+#: rer/newsletterplugin/flask/adapter/flask_adapter.py:45
+msgid "endpoint_not_set"
+msgstr "Servizio di spedizione esterno non impostato. Per favore impostalo nel pannello di controllo del sito."
+
 #. Default: "Message correctly enqueued to be sent to ${subscribers} subscribers. Please check Channel history to know when the task ends."
 #: rer/newsletterplugin/flask/browser/sendmessageview.py:11
 msgid "message_send"
 msgstr "Messaggio accodato correttamente per essere spedito a ${subscribers} iscritti. Per favore controlla la cronologia del canale per sapere quando la procedura di invio è conclusa."
+
+#. Default: "Insert the url of the Flask server that will handle the queue (for example: http://127.0.0.1:5000/add-to-queue)."
+#: rer/newsletterplugin/flask/interfaces.py:17
+msgid "queue_endpoint_help"
+msgstr "Inserisci l'url del server Flask che si occuperà della gestione della coda (per esempio http://127.0.0.1:5000/add-to-queue)."
+
+#. Default: "Queue endpoint"
+#: rer/newsletterplugin/flask/interfaces.py:16
+msgid "queue_endpoint_label"
+msgstr "Servizio di invio esterno"
 
 #: rer/newsletterplugin/flask/configure.zcml:29
 msgid "rer.newsletterplugin.flask"
