@@ -1,20 +1,25 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime
-from datetime import timedelta
 from email.utils import formataddr
 from plone import api
-from rer.newsletter import _
 from rer.newsletter import logger
-from rer.newsletter.adapter.base_adapter import BaseAdapter
-from rer.newsletter.adapter.base_adapter import IChannelSender
-from rer.newsletter.utility.channel import INVALID_CHANNEL
-from rer.newsletter.utility.channel import OK
-from rer.newsletter.utility.channel import UNHANDLED
-from smtplib import SMTPRecipientsRefused
+from rer.newsletter.adapter.sender import BaseAdapter
+from rer.newsletter.adapter.sender import IChannelSender
+from rer.newsletter.utils import NOK
+from rer.newsletter.utils import OK
+from rer.newsletter.utils import UNHANDLED
+from rer.newsletterplugin.flask import _
+from rer.newsletterplugin.flask.interfaces import (
+    INewsletterPluginFlaskSettings,
+)
 from zope.interface import implementer
+from requests.exceptions import ConnectionError
+from requests.exceptions import Timeout
 
+import json
+import requests
 
-KEY = 'rer.newsletter.subscribers'
+SUBSCRIBERS_KEY = 'rer.newsletter.subscribers'
+HISTORY_KEY = 'rer.newsletter.channel.history'
 
 
 @implementer(IChannelSender)
@@ -26,37 +31,74 @@ class FlaskAdapter(BaseAdapter):
         self.context = context
         self.request = request
 
-    def sendMessage(self, channel, message, unsubscribe_footer=None):
-        logger.warning('adapter: sendMessage %s %s', channel, message.title)
+    def sendMessage(self, message):
+        logger.debug(
+            'adapter: sendMessage %s %s', self.context.title, message.title
+        )
+        queue_endpoint = api.portal.get_registry_record(
+            'queue_endpoint',
+            interface=INewsletterPluginFlaskSettings,
+            default=u'',
+        )
+        if not queue_endpoint:
+            api.portal.show_message(
+                message=_(
+                    u'endpoint_not_set',
+                    default=u'Queue endpoint not set. Please set it in site controlpanel.',  # noqa
+                ),
+                request=self.context.REQUEST,
+                type='error',
+            )
+            return NOK
+        # Costruzione del messaggio: body, subject, destinatari, ...
+        subscribers = self.get_annotations_for_channel(key=SUBSCRIBERS_KEY)
+        recipients = []
+        for user in subscribers.keys():
+            if subscribers[user]['is_active']:
+                recipients.append(subscribers[user]['email'])
 
-        # nl = self._api(channel)
-        # annotations, channel_obj = self._storage(channel)
-        # if annotations is None:
-        #     return INVALID_CHANNEL
-        #
-        # # costruisco il messaggio
-        # body = self._getMessage(nl, message, unsubscribe_footer)
-        #
-        # nl_subject = ' - ' + nl.subject_email if nl.subject_email else u''
-        # subject = message.title + nl_subject
-        #
-        # # costruisco l'indirizzo del mittente
-        # sender = formataddr((nl.sender_name, nl.sender_name))
-        #
-        # # invio la mail ad ogni utente
-        # mail_host = api.portal.get_tool(name='MailHost')
-        # try:
-        #     for user in annotations.keys():
-        #         if annotations[user]['is_active']:
-        #             mail_host.send(
-        #                 body.getData(),
-        #                 mto=annotations[user]['email'],
-        #                 mfrom=sender,
-        #                 subject=subject,
-        #                 charset='utf-8',
-        #                 msg_type='text/html'
-        #             )
-        # except SMTPRecipientsRefused:
-        #     return UNHANDLED
+        nl_subject = (
+            ' - ' + self.context.subject_email
+            if self.context.subject_email
+            else u''
+        )
+
+        sender = (
+            self.context.sender_name
+            and formataddr(  # noqa
+                (self.context.sender_name, self.context.sender_email)
+            )
+            or self.context.sender_email  # noqa
+        )
+        subject = message.title + nl_subject
+
+        send_uid = self.set_start_send_infos(message=message)
+
+        # Preparazione della request con il vero payload e l'header
+        body = self.prepare_body(message=message)
+        headers = {"Content-Type": "application/json"}
+        payload = {
+            'channel_url': self.context.absolute_url(),
+            'subscribers': recipients,
+            'subject': subject,
+            'mfrom': sender,
+            'text': body.getData(),
+            'send_uid': send_uid,
+        }
+        try:
+            response = requests.post(
+                queue_endpoint, data=json.dumps(payload), headers=headers
+            )
+        except (ConnectionError, Timeout) as e:
+            logger.exception(e)
+            self.set_end_send_infos(send_uid=send_uid, completed=False)
+            return NOK
+        if response.status_code != 200:
+            logger.error(
+                "adapter: can't sendMessage %s %s",
+                self.context.title,
+                message.title,
+            )
+            return UNHANDLED
 
         return OK
