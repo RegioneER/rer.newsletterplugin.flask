@@ -4,6 +4,7 @@ from plone import api
 from rer.newsletter import logger
 from rer.newsletter.adapter.sender import BaseAdapter
 from rer.newsletter.adapter.sender import IChannelSender
+from rer.newsletter.browser.settings import ISettingsSchema
 from rer.newsletter.utils import NOK
 from rer.newsletter.utils import OK
 from rer.newsletter.utils import UNHANDLED
@@ -16,6 +17,7 @@ from requests.exceptions import ConnectionError
 from requests.exceptions import Timeout
 
 import json
+import re
 import requests
 
 SUBSCRIBERS_KEY = 'rer.newsletter.subscribers'
@@ -78,7 +80,7 @@ class FlaskAdapter(BaseAdapter):
         body = self.prepare_body(message=message)
         headers = {"Content-Type": "application/json"}
         payload = {
-            'channel_url': self.context.absolute_url(),
+            'channel_url': self.convert_url(self.context.absolute_url()),
             'subscribers': recipients,
             'subject': subject,
             'mfrom': sender,
@@ -102,3 +104,21 @@ class FlaskAdapter(BaseAdapter):
             return UNHANDLED
 
         return OK
+
+    def convert_url(self, url):
+        source_link = api.portal.get_registry_record(
+            'source_link', ISettingsSchema
+        )
+        if not source_link:
+            source_link = api.portal.get().absolute_url()
+
+        destination_link = api.portal.get_registry_record(
+            'destination_link', ISettingsSchema
+        )
+
+        # non è questo il modo migliore per fare il replace...
+        # 1. non serve usare re.sub ma basta il replace di string
+        # 2. forse sarebbe più corretto usare un metodo di lxml
+        if source_link and destination_link:
+            return re.sub(source_link, destination_link, url)
+        return url
