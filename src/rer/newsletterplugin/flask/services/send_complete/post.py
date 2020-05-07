@@ -64,4 +64,5 @@ class SendCompletePost(Service):
                         message='Unable to update end date. See application log for more details',  # noqa
                     )
                 )
-        return self.reply_no_content()
+        self.request.response.setStatus(204)
+        return
