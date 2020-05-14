@@ -168,6 +168,7 @@ class FlaskAdapter(BaseAdapter):
                 'style': channel.css_style if channel.css_style else u'',
                 'portal_name': portal.title,
                 'channel_name': channel.title,
+                'subscribers': send_info.get('subscribers', ''),
                 'message_title': send_info.get('message', ''),
             }
             mail_text = message_template(**parameters)
@@ -175,11 +176,7 @@ class FlaskAdapter(BaseAdapter):
                 'text/mail', mail_text
             )
 
-            # response_email = None
-            # if channel.response_email:
-            #     response_email = channel.response_email
-
-            subject = u'Risultato invio asincrono di {0} del {1} del '.format(
+            subject = u'Risultato invio di {0} del {1} del '.format(
                 send_info.get('message', ''), channel.title
             ) + u'portale {0}'.format(get_site_title())
 

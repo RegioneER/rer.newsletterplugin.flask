@@ -30,7 +30,7 @@ msgstr "Servizio di spedizione esterno non impostato. Per favore impostalo nel p
 #. Default: "Message correctly enqueued to be sent to ${subscribers} subscribers. Please check Channel history to know when the task ends or wait the confirm email."
 #: rer/newsletterplugin/flask/browser/sendmessageview.py:11
 msgid "message_send"
-msgstr "Messaggio accodato correttamente per essere spedito a ${subscribers} iscritti. Per favore controlla la cronologia del canale per sapere quando la procedura di invio è conclusa o aspetta la mail di conferma."
+msgstr "Messaggio accodato correttamente per essere spedito a ${subscribers} iscritti. A conclusione della procedura, nella casella di posta mittente del canale arriverà una notifica con l'esito dell'invio."
 
 #. Default: "Insert the url of the Flask server that will handle the queue (for example: http://127.0.0.1:5000/add-to-queue)."
 #: rer/newsletterplugin/flask/interfaces.py:17
