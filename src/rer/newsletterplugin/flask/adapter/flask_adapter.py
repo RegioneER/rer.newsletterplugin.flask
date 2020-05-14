@@ -8,6 +8,7 @@ from rer.newsletter.browser.settings import ISettingsSchema
 from rer.newsletter.utils import NOK
 from rer.newsletter.utils import OK
 from rer.newsletter.utils import UNHANDLED
+from rer.newsletter.utils import get_site_title
 from rer.newsletterplugin.flask import _
 from rer.newsletterplugin.flask.interfaces import (
     INewsletterPluginFlaskSettings,
@@ -122,3 +123,60 @@ class FlaskAdapter(BaseAdapter):
         if source_link and destination_link:
             return re.sub(source_link, destination_link, url)
         return url
+
+    def set_end_send_infos(self, send_uid, completed=True):
+        res = super(FlaskAdapter, self).set_end_send_infos(
+            send_uid=send_uid, completed=completed
+        )
+        self._sendNotification(status=completed, send_uid=send_uid)
+        return res
+
+    def _sendNotification(self, status, send_uid):
+        """ send notification to user when asynch call is finished """
+        portal = api.portal.get()
+        channel = self.context
+        details = self.get_annotations_for_channel(key=HISTORY_KEY)
+        send_info = [x for x in details if x['uid'] == send_uid][0]
+
+        if channel.sender_email:
+            message_template = None
+            if status:
+                message_template = self.context.restrictedTraverse(
+                    '@@{0}'.format('asynch_send_success')
+                )
+            else:
+                message_template = self.context.restrictedTraverse(
+                    '@@{0}'.format('asynch_send_fail')
+                )
+            parameters = {
+                'header': channel.header.output if channel.header else u'',
+                'footer': channel.footer.output if channel.footer else u'',
+                'style': channel.css_style if channel.css_style else u'',
+                'portal_name': portal.title,
+                'channel_name': channel.title,
+                'message_title': send_info.get('message', ''),
+            }
+            mail_text = message_template(**parameters)
+            mail_text = portal.portal_transforms.convertTo(
+                'text/mail', mail_text
+            )
+
+            # response_email = None
+            # if channel.response_email:
+            #     response_email = channel.response_email
+
+            subject = u'Risultato invio asincrono di {0} del {1} del '.format(
+                send_info.get('message', ''), channel.title
+            ) + u'portale {0}'.format(get_site_title())
+
+            mail_host = api.portal.get_tool(name='MailHost')
+            mail_host.send(
+                mail_text.getData(),
+                mto=channel.sender_email,
+                mfrom=channel.sender_email,
+                subject=subject,
+                charset='utf-8',
+                msg_type='text/html',
+            )
+        else:
+            logger.exception('Non è stato impostato l\'indirizzo del mittente')

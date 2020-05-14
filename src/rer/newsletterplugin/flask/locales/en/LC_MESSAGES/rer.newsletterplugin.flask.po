@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2020-05-06 14:04+0000\n"
+"POT-Creation-Date: 2020-05-14 08:21+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI +ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,11 +23,11 @@ msgid "Uninstalls the rer.newsletterplugin.flask add-on."
 msgstr ""
 
 #. Default: "Queue endpoint not set. Please set it in site controlpanel."
-#: rer/newsletterplugin/flask/adapter/flask_adapter.py:45
+#: rer/newsletterplugin/flask/adapter/flask_adapter.py:48
 msgid "endpoint_not_set"
 msgstr ""
 
-#. Default: "Message correctly enqueued to be sent to ${subscribers} subscribers. Please check Channel history to know when the task ends."
+#. Default: "Message correctly enqueued to be sent to ${subscribers} subscribers. Please check Channel history to know when the task ends or wait the confirm email."
 #: rer/newsletterplugin/flask/browser/sendmessageview.py:11
 msgid "message_send"
 msgstr ""

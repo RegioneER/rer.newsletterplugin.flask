@@ -19,6 +19,6 @@ class INewsletterPluginFlaskSettings(Interface):
             default=u'Insert the url of the Flask server that will handle the'
             u' queue (for example: http://127.0.0.1:5000/add-to-queue).',
         ),
-        default=u'',
+        default=u'http://127.0.0.1:5000/add-to-queue',
         required=True,
     )

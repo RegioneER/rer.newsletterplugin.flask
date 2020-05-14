@@ -12,7 +12,7 @@ class SendMessageViewCustom(SendMessageView):
             u'message_send',
             default=u'Message correctly enqueued to be sent to ${subscribers} '
             u'subscribers. Please check Channel history to know when '
-            u'the task ends.',
+            u'the task ends or wait the confirm email.',
             mapping=dict(subscribers=self.active_subscriptions),
         )
 
