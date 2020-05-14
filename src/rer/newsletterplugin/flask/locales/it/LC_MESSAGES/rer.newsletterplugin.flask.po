@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2020-05-14 08:21+0000\n"
+"POT-Creation-Date: 2020-05-14 09:11+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI +ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -23,7 +23,7 @@ msgid "Uninstalls the rer.newsletterplugin.flask add-on."
 msgstr ""
 
 #. Default: "Queue endpoint not set. Please set it in site controlpanel."
-#: rer/newsletterplugin/flask/adapter/flask_adapter.py:48
+#: rer/newsletterplugin/flask/adapter/flask_adapter.py:49
 msgid "endpoint_not_set"
 msgstr "Servizio di spedizione esterno non impostato. Per favore impostalo nel pannello di controllo del sito."
 
@@ -41,6 +41,11 @@ msgstr "Inserisci l'url del server Flask che si occuperà della gestione della c
 #: rer/newsletterplugin/flask/interfaces.py:16
 msgid "queue_endpoint_label"
 msgstr "Servizio di invio esterno"
+
+#. Default: "There are 0 subscribers to this channel."
+#: rer/newsletterplugin/flask/adapter/flask_adapter.py:66
+msgid "recipients_empty"
+msgstr "Ci sono 0 iscritti in questo canale."
 
 #: rer/newsletterplugin/flask/configure.zcml:29
 msgid "rer.newsletterplugin.flask"

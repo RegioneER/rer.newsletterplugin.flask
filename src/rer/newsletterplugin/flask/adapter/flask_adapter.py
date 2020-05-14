@@ -5,6 +5,7 @@ from rer.newsletter import logger
 from rer.newsletter.adapter.sender import BaseAdapter
 from rer.newsletter.adapter.sender import IChannelSender
 from rer.newsletter.browser.settings import ISettingsSchema
+from rer.newsletter.utils import compose_sender
 from rer.newsletter.utils import NOK
 from rer.newsletter.utils import OK
 from rer.newsletter.utils import UNHANDLED
@@ -60,6 +61,17 @@ class FlaskAdapter(BaseAdapter):
             if subscribers[user]['is_active']:
                 recipients.append(subscribers[user]['email'])
 
+        if not recipients:
+            api.portal.show_message(
+                message=_(
+                    u'recipients_empty',
+                    default=u'There are 0 subscribers to this channel.',
+                ),
+                request=self.context.REQUEST,
+                type='error',
+            )
+            return NOK
+
         nl_subject = (
             ' - ' + self.context.subject_email
             if self.context.subject_email
@@ -98,9 +110,11 @@ class FlaskAdapter(BaseAdapter):
             return NOK
         if response.status_code != 200:
             logger.error(
-                "adapter: can't sendMessage %s %s",
-                self.context.title,
-                message.title,
+                'Unable to send message "{message}" to channel {channel}: {reason}'.format(  # noqa
+                    channel=self.context.title,
+                    message=message.title,
+                    reason=response.text,
+                )
             )
             return UNHANDLED
 
@@ -169,11 +183,13 @@ class FlaskAdapter(BaseAdapter):
                 send_info.get('message', ''), channel.title
             ) + u'portale {0}'.format(get_site_title())
 
+            sender = compose_sender(self.context)
+
             mail_host = api.portal.get_tool(name='MailHost')
             mail_host.send(
                 mail_text.getData(),
                 mto=channel.sender_email,
-                mfrom=channel.sender_email,
+                mfrom=sender,
                 subject=subject,
                 charset='utf-8',
                 msg_type='text/html',
