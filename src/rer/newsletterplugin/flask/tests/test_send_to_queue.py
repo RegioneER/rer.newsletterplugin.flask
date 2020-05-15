@@ -56,6 +56,12 @@ class SendToQueueTest(unittest.TestCase):
             interface=INewsletterPluginFlaskSettings,
         )
 
+    def add_subscriber(self, email):
+        subscribers_adapter = getMultiAdapter(
+            (self.channel, self.request), IChannelSubscriptions
+        )
+        subscribers_adapter.addUser(email)
+
     @requests_mock.mock()
     def test_return_nok_if_queue_endpoint_not_set(self, m):
         m.post(QUEUE_URL, status_code=200)
@@ -74,8 +80,17 @@ class SendToQueueTest(unittest.TestCase):
         )
 
     @requests_mock.mock()
+    def test_return_nok_if_there_are_no_subscribers(self, m):
+        m.post(QUEUE_URL, status_code=200)
+
+        res = self.adapter.sendMessage(self.message)
+        self.assertEqual(res, NOK)
+        self.assertFalse(m.called)
+
+    @requests_mock.mock()
     def test_return_ok_and_call_backend_if_queue_endpoint_is_set(self, m):
         m.post(QUEUE_URL, status_code=200)
+        self.add_subscriber('foo@foo.com')
 
         res = self.adapter.sendMessage(self.message)
         self.assertEqual(res, OK)
@@ -84,6 +99,7 @@ class SendToQueueTest(unittest.TestCase):
     @requests_mock.mock()
     def test_call_endpoint_with_required_parameters(self, m):
         m.post(QUEUE_URL, status_code=200)
+        self.add_subscriber('foo@foo.com')
 
         self.adapter.sendMessage(self.message)
         history = m.request_history[0]
@@ -99,6 +115,7 @@ class SendToQueueTest(unittest.TestCase):
     @requests_mock.mock()
     def test_call_endpoint_with_right_channel_url(self, m):
         m.post(QUEUE_URL, status_code=200)
+        self.add_subscriber('foo@foo.com')
 
         self.adapter.sendMessage(self.message)
         history = m.request_history[0]
@@ -111,6 +128,7 @@ class SendToQueueTest(unittest.TestCase):
     @requests_mock.mock()
     def test_call_endpoint_with_right_subject(self, m):
         m.post(QUEUE_URL, status_code=200)
+        self.add_subscriber('foo@foo.com')
 
         self.adapter.sendMessage(self.message)
         history = m.request_history[0]
@@ -121,6 +139,7 @@ class SendToQueueTest(unittest.TestCase):
     @requests_mock.mock()
     def test_call_endpoint_with_right_mfrom(self, m):
         m.post(QUEUE_URL, status_code=200)
+        self.add_subscriber('foo@foo.com')
 
         self.adapter.sendMessage(self.message)
         history = m.request_history[0]
@@ -142,26 +161,21 @@ class SendToQueueTest(unittest.TestCase):
     @requests_mock.mock()
     def test_call_endpoint_with_right_subscribers_list(self, m):
         m.post(QUEUE_URL, status_code=200)
+        self.add_subscriber('foo@foo.com')
 
         self.adapter.sendMessage(self.message)
         history = m.request_history[0]
         parameters = history.json()
-        self.assertEqual(parameters['subscribers'], [])
 
-        subscribers_adapter = getMultiAdapter(
-            (self.channel, self.request), IChannelSubscriptions
-        )
-        subscribers_adapter.addUser('foo@foo.com')
-        self.adapter.sendMessage(self.message)
-        history = m.request_history[1]
-        parameters = history.json()
         self.assertEqual(parameters['subscribers'], ['foo@foo.com'])
 
     @requests_mock.mock()
     def test_call_endpoint_with_right_text(self, m):
         m.post(QUEUE_URL, status_code=200)
+        self.add_subscriber('foo@foo.com')
 
         self.adapter.sendMessage(self.message)
         history = m.request_history[0]
         parameters = history.json()
+
         self.assertIn(self.message.text.output, parameters['text'])
