@@ -55,15 +55,15 @@ class SendToQueueTest(unittest.TestCase):
 
         url = 'http://foo.com/example/bar'
         api.portal.set_registry_record(
-            'source_link', 'http://foo.com', ISettingsSchema
+            'source_link', u'http://foo.com', ISettingsSchema
         )
         transaction.commit()
 
         self.assertEqual(url, self.adapter.convert_url(url))
 
-        api.portal.set_registry_record('source_link', '', ISettingsSchema)
+        api.portal.set_registry_record('source_link', u'', ISettingsSchema)
         api.portal.set_registry_record(
-            'destination_link', 'http://baz.com', ISettingsSchema
+            'destination_link', u'http://baz.com', ISettingsSchema
         )
         transaction.commit()
 
@@ -73,10 +73,10 @@ class SendToQueueTest(unittest.TestCase):
 
         url = 'http://foo.com/example/bar'
         api.portal.set_registry_record(
-            'source_link', 'http://foo.com', ISettingsSchema
+            'source_link', u'http://foo.com', ISettingsSchema
         )
         api.portal.set_registry_record(
-            'destination_link', 'http://baz.com', ISettingsSchema
+            'destination_link', u'http://baz.com', ISettingsSchema
         )
         transaction.commit()
 
