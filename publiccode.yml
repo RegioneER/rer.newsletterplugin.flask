@@ -1,0 +1,68 @@
+# This repository adheres to the publiccode.yml standard by including this
+# metadata file that makes public software easily discoverable.
+# More info at https://github.com/italia/publiccode.yml
+
+publiccodeYmlVersion: "0.2"
+categories:
+  - application-development
+  - content-management
+  - communications
+logo: docs/rer-logo.png
+dependsOn:
+  open:
+    - name: Plone
+      optional: false
+      version: ""
+      versionMax: ""
+      versionMin: "5.1"
+description:
+  it:
+    features:
+      - Newsletter
+      - Invio massivo
+    genericName: Plone addon
+    longDescription: >
+      Plugin aggiuntivo per rer.newsletter che permette di spostare l'invio delle mail su un servizio esterno,
+      in modo da evitare di sovraccaricare il sito Plone durante l'invio di tante mail.
+    shortDescription: Prodotto per la l'invio delle newsletter esternamente a Plone
+developmentStatus: development
+it:
+  conforme:
+    gdpr: true
+    lineeGuidaDesign: false
+    misureMinimeSicurezza: true
+    modelloInteroperabilita: true
+  countryExtensionVersion: "0.2"
+  piattaforme:
+    anpr: false
+    cie: false
+    pagopa: false
+    spid: false
+legal:
+  license: GPL-2.0-only
+  mainCopyrightOwner: Regione Emilia-Romagna
+  repoOwner: Regione Emilia-Romagna
+localisation:
+  availableLanguages:
+    - it
+    - en
+  localisationReady: true
+maintenance:
+  contacts:
+    - affiliation: Regione Emilia-Romagna
+      email: webmaster@regione.emilia-romagna.it
+      name: Sara Turra
+  contractors:
+    - name: RedTurtle
+      until: "2020-08-31"
+      website: "https://www.redturtle.it/"
+  type: contract
+name: rer.newsletterplugin.flask
+platforms:
+  - web
+releaseDate: "2020-05-20"
+softwareType: addon
+softwareVersion: 0.1.0
+url: "https://github.com/RegioneER/rer.newsletterplugin.flask"
+usedBy:
+  - Regione Emilia-Romagna
