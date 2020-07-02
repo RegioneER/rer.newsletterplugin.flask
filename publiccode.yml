@@ -27,6 +27,8 @@ description:
     shortDescription: Prodotto per la l'invio delle newsletter esternamente a Plone
 developmentStatus: development
 it:
+  riuso:
+    codiceIPA: r_emiro
   conforme:
     gdpr: true
     lineeGuidaDesign: false
