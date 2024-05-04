@@ -50,6 +50,7 @@ setup(
     namespace_packages=["rer", "rer.newsletterplugin"],
     package_dir={"": "src"},
     include_package_data=True,
+    python_requires=">=3.7",
     zip_safe=False,
     install_requires=[
         "setuptools",
