@@ -2,7 +2,7 @@ Changelog
 =========
 
 
-0.1.1 (unreleased)
+0.1.1 (2024-05-04)
 ------------------
 
 - Fix python version for Plone6.
