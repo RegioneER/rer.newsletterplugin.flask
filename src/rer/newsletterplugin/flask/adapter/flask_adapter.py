@@ -22,60 +22,55 @@ import json
 import re
 import requests
 
-SUBSCRIBERS_KEY = 'rer.newsletter.subscribers'
-HISTORY_KEY = 'rer.newsletter.channel.history'
+SUBSCRIBERS_KEY = "rer.newsletter.subscribers"
+HISTORY_KEY = "rer.newsletter.channel.history"
 
 
 @implementer(IChannelSender)
 class FlaskAdapter(BaseAdapter):
-    """ Adapter per l'invio delle newsletter fuori da
-    """
+    """Adapter per l'invio delle newsletter fuori da"""
 
     def __init__(self, context, request):
         self.context = context
         self.request = request
 
     def sendMessage(self, message):
-        logger.debug(
-            'adapter: sendMessage %s %s', self.context.title, message.title
-        )
+        logger.debug("adapter: sendMessage %s %s", self.context.title, message.title)
         queue_endpoint = api.portal.get_registry_record(
-            'queue_endpoint',
+            "queue_endpoint",
             interface=INewsletterPluginFlaskSettings,
-            default=u'',
+            default="",
         )
         if not queue_endpoint:
             api.portal.show_message(
                 message=_(
-                    u'endpoint_not_set',
-                    default=u'Queue endpoint not set. Please set it in site controlpanel.',  # noqa
+                    "endpoint_not_set",
+                    default="Queue endpoint not set. Please set it in site controlpanel.",  # noqa
                 ),
                 request=self.context.REQUEST,
-                type='error',
+                type="error",
             )
             return NOK
         # Costruzione del messaggio: body, subject, destinatari, ...
         subscribers = self.get_annotations_for_channel(key=SUBSCRIBERS_KEY)
         recipients = []
         for user in subscribers.keys():
-            if subscribers[user]['is_active']:
-                recipients.append(subscribers[user]['email'])
+            if subscribers[user]["is_active"]:
+                recipients.append(subscribers[user]["email"])
 
         if not recipients:
             api.portal.show_message(
                 message=_(
-                    u'recipients_empty',
-                    default=u'There are 0 subscribers to this channel.',
+                    "recipients_empty",
+                    default="There are 0 subscribers to this channel.",
                 ),
                 request=self.context.REQUEST,
-                type='error',
+                type="error",
             )
             return NOK
 
         nl_subject = (
-            ' - ' + self.context.subject_email
-            if self.context.subject_email
-            else u''
+            " - " + self.context.subject_email if self.context.subject_email else ""
         )
 
         sender = (
@@ -93,12 +88,12 @@ class FlaskAdapter(BaseAdapter):
         body = self.prepare_body(message=message)
         headers = {"Content-Type": "application/json"}
         payload = {
-            'channel_url': self.convert_url(self.context.absolute_url()),
-            'subscribers': recipients,
-            'subject': subject,
-            'mfrom': sender,
-            'text': body.getData(),
-            'send_uid': send_uid,
+            "channel_url": self.convert_url(self.context.absolute_url()),
+            "subscribers": recipients,
+            "subject": subject,
+            "mfrom": sender,
+            "text": body.getData(),
+            "send_uid": send_uid,
         }
         try:
             response = requests.post(
@@ -121,15 +116,26 @@ class FlaskAdapter(BaseAdapter):
         return OK
 
     def convert_url(self, url):
-        source_link = api.portal.get_registry_record(
-            'source_link', ISettingsSchema
-        )
+
+        # If volto frontend_domain is set, use it as destination link
+        try:
+            destination_link = api.portal.get_registry_record(
+                "volto.frontend_domain", default=""
+            )
+            if destination_link.endswith("/"):
+                destination_link = destination_link[:-1]
+            destination_link += "/++api++"
+        except KeyError:
+            destination_link = ""
+        if not destination_link:
+            # otherwise, use the newsletter one
+            destination_link = api.portal.get_registry_record(
+                "destination_link", ISettingsSchema
+            )
+
+        source_link = api.portal.get_registry_record("source_link", ISettingsSchema)
         if not source_link:
             source_link = api.portal.get().absolute_url()
-
-        destination_link = api.portal.get_registry_record(
-            'destination_link', ISettingsSchema
-        )
 
         # non è questo il modo migliore per fare il replace...
         # 1. non serve usare re.sub ma basta il replace di string
@@ -146,50 +152,48 @@ class FlaskAdapter(BaseAdapter):
         return res
 
     def _sendNotification(self, status, send_uid):
-        """ send notification to user when asynch call is finished """
+        """send notification to user when asynch call is finished"""
         portal = api.portal.get()
         channel = self.context
         details = self.get_annotations_for_channel(key=HISTORY_KEY)
-        send_info = [x for x in details if x['uid'] == send_uid][0]
+        send_info = [x for x in details if x["uid"] == send_uid][0]
 
         if channel.sender_email:
             message_template = None
             if status:
                 message_template = self.context.restrictedTraverse(
-                    '@@{0}'.format('asynch_send_success')
+                    "@@{0}".format("asynch_send_success")
                 )
             else:
                 message_template = self.context.restrictedTraverse(
-                    '@@{0}'.format('asynch_send_fail')
+                    "@@{0}".format("asynch_send_fail")
                 )
             parameters = {
-                'header': channel.header.output if channel.header else u'',
-                'footer': channel.footer.output if channel.footer else u'',
-                'style': channel.css_style if channel.css_style else u'',
-                'portal_name': portal.title,
-                'channel_name': channel.title,
-                'subscribers': send_info.get('subscribers', ''),
-                'message_title': send_info.get('message', ''),
+                "header": channel.header.output if channel.header else "",
+                "footer": channel.footer.output if channel.footer else "",
+                "style": channel.css_style if channel.css_style else "",
+                "portal_name": portal.title,
+                "channel_name": channel.title,
+                "subscribers": send_info.get("subscribers", ""),
+                "message_title": send_info.get("message", ""),
             }
             mail_text = message_template(**parameters)
-            mail_text = portal.portal_transforms.convertTo(
-                'text/mail', mail_text
-            )
+            mail_text = portal.portal_transforms.convertTo("text/mail", mail_text)
 
-            subject = u'Risultato invio di {0} del {1} del '.format(
-                send_info.get('message', ''), channel.title
-            ) + u'portale {0}'.format(get_site_title())
+            subject = "Risultato invio di {0} del {1} del ".format(
+                send_info.get("message", ""), channel.title
+            ) + "portale {0}".format(get_site_title())
 
             sender = compose_sender(self.context)
 
-            mail_host = api.portal.get_tool(name='MailHost')
+            mail_host = api.portal.get_tool(name="MailHost")
             mail_host.send(
                 mail_text.getData(),
                 mto=channel.sender_email,
                 mfrom=sender,
                 subject=subject,
-                charset='utf-8',
-                msg_type='text/html',
+                charset="utf-8",
+                msg_type="text/html",
             )
         else:
-            logger.exception('Non è stato impostato l\'indirizzo del mittente')
+            logger.exception("Non è stato impostato l'indirizzo del mittente")
