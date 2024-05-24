@@ -16,7 +16,7 @@ long_description = "\n\n".join(
 
 setup(
     name="rer.newsletterplugin.flask",
-    version="0.1.1",
+    version="0.2.0",
     description="Add-on per Plone collegato a rer.newsletter per inviare le mail usando un servizio Flask",
     long_description=long_description,
     # Get more from https://pypi.org/classifiers/
