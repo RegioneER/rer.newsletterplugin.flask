@@ -162,16 +162,14 @@ class FlaskAdapter(BaseAdapter):
             message_template = None
             if status:
                 message_template = self.context.restrictedTraverse(
-                    "@@{0}".format("asynch_send_success")
+                    "@@asynch_send_success"
                 )
             else:
-                message_template = self.context.restrictedTraverse(
-                    "@@{0}".format("asynch_send_fail")
-                )
+                message_template = self.context.restrictedTraverse("@@asynch_send_fail")
             parameters = {
-                "header": channel.header.output if channel.header else "",
-                "footer": channel.footer.output if channel.footer else "",
-                "style": channel.css_style if channel.css_style else "",
+                "header": getattr(channel, "header", "") or "",
+                "footer": getattr(channel, "footer", "") or "",
+                "style": getattr(channel, "css_style", "") or "",
                 "portal_name": portal.title,
                 "channel_name": channel.title,
                 "subscribers": send_info.get("subscribers", ""),

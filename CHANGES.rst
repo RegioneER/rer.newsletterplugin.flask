@@ -4,7 +4,8 @@ Changelog
 0.2.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Fix styles in send notification for managers.
+  [cekk]
 
 
 0.2.0 (2024-05-24)

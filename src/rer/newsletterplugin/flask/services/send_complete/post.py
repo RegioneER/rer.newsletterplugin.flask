@@ -24,27 +24,13 @@ class SendCompletePost(Service):
         if not send_uid:
             self.request.response.setStatus(400)
             return dict(
-                error=dict(
-                    type="BadRequest", message='Missing "send_uid" parameter'
-                )
+                error=dict(type="BadRequest", message='Missing "send_uid" parameter')
             )
         # Disable CSRF protection
         alsoProvides(self.request, IDisableCSRFProtection)
 
         adapter = getMultiAdapter((self.context, self.request), IChannelSender)
-        try:
-            res = adapter.set_end_send_infos(
-                send_uid=send_uid, completed=not error
-            )
-        except Exception:
-            plone_utils = api.content.get_view(
-                name="plone_utils", context=self.context, request=self.request
-            )
-            exception = plone_utils.exceptionString()
-            self.request.response.setStatus(500)
-            return dict(
-                error=dict(type="InternalServerError", message=exception)
-            )
+        res = adapter.set_end_send_infos(send_uid=send_uid, completed=not error)
         if res != OK:
             if res == SEND_UID_NOT_FOUND:
                 self.request.response.setStatus(500)
@@ -61,7 +47,7 @@ class SendCompletePost(Service):
                 return dict(
                     error=dict(
                         type="InternalServerError",
-                        message='Unable to update end date. See application log for more details',  # noqa
+                        message="Unable to update end date. See application log for more details",  # noqa
                     )
                 )
         self.request.response.setStatus(204)
