@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.2.1 (unreleased)
+0.2.1 (2024-06-13)
 ------------------
 
 - Fix styles in send notification for managers.
